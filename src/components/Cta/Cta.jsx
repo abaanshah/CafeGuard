@@ -20,7 +20,7 @@ const CtaSection = () => {
             onClick={handleEmailLink}
             className="px-10 py-4 text-lg font-semibold text-white bg-[#284838] rounded-full hover:bg-[#9A5832] transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
-            Get a Free Demo
+            Register for Wi-Fi
           </button>
         </div>
       </div>

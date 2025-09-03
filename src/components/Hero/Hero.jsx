@@ -1,16 +1,13 @@
 import React from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const Hero = () => {
-  // This function handles the smooth scrolling when the button is clicked.
-  const handleScrollToContact = () => {
-    // Finds the element with the id 'contact' (which is your CtaSection).
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      // Smoothly scrolls the page to that section.
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  const navigate = useNavigate();
 
+  const handleToLogin = () =>{
+    navigate('/login');
+  };
+  
   return (
     <section className="h-[90vh] text-center py-24 md:py-32 bg-white">
       <div className="container mx-auto px-6">
@@ -26,10 +23,10 @@ const Hero = () => {
           {/* --- UPDATED THIS BLOCK --- */}
           {/* Now using a <button> with an onClick handler for clean, reliable behavior */}
           <button 
-            onClick={handleScrollToContact}
+            onClick={handleToLogin}
             className="px-10 py-4 text-lg font-semibold text-white bg-[#9A5832] rounded-full hover:bg-[#284838] transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
-            Request a Demo
+            Register For Wi-Fi
           </button>
         </div>
       </div>

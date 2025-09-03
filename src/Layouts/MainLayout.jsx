@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar/Navbar";
 
 function MainLayout({ children }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-[#FAF9F6]">
         <Navbar/>
       <main className={`flex-grow "pt-[50px]" : ""}`}>
         {children}

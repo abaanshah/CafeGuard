@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-
-// --- Configuration ---
-// This is the address of your backend server.
 const BACKEND_URL = 'http://localhost:4443';
+import cafeguard from '../../assets/cafeguardLogo.png';
 
 // This single component now handles all three steps:
 // 1. Entering a phone number.
@@ -136,25 +134,47 @@ function Login() {
   const renderStepContent = () => {
     switch (step) {
       case 'phone':
-        return (/* Phone form JSX remains the same */ <form onSubmit={handlePhoneSubmit} className="w-full flex flex-col space-y-6"> <div className="text-center"> <h2 className="text-xl font-semibold text-[#1F4D34] mb-2">Get Started</h2> <p className="text-gray-600">Enter your mobile number to receive a secure access code.</p></div><input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+91 or 10-digit mobile number" className="bg-[#FAF9F6] rounded-lg w-full h-12 px-4 border border-[#1F4D34] focus:border-[#A45A2A] focus:ring-2 focus:ring-[#A45A2A] outline-none text-[#1F4D34]"/> <button type="submit" disabled={loading} className="px-6 py-3 text-lg font-semibold text-white bg-[#9A5832] rounded-full w-full hover:bg-[#284838] transition-all duration-300 transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:scale-100">{loading ? 'Sending...' : 'Get OTP'}</button></form>);
+        return (
+          <form onSubmit={handlePhoneSubmit} className="w-full flex flex-col">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-semibold text-[#1F4D34]">Get Started</h2>
+              <p className="text-gray-600 mt-2">Enter your mobile number to receive a secure access code.</p>
+            </div>
+            <input
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="+91 or 10-digit mobile number"
+              className="bg-[#FAF9F6] rounded-lg w-full h-12 px-4 border border-[#1F4D34] focus:border-[#A45A2A] focus:ring-2 focus:ring-[#A45A2A] outline-none text-[#1F4D34]"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              style={{ marginTop: '1.5rem' }} // This is equivalent to mt-6 and will override the reset style.
+              className="px-6 py-3 text-lg font-semibold text-white bg-[#9A5832] rounded-full w-full hover:bg-[#284838] transition-all duration-300 transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:scale-100"
+            >
+              {loading ? 'Sending...' : 'Get OTP'}
+            </button>
+          </form>
+        );
       case 'otp':
-        return (/* OTP form JSX remains the same, with the test OTP hint */<div className="flex flex-col items-center w-full"><h2 className="text-xl font-semibold text-[#1F4D34] mb-4">Enter OTP</h2><p className="text-gray-600 mb-6 text-center">An access code was sent to <br/>+91 {phoneNumber}</p><div className="flex space-x-2 md:space-x-3">{otp.map((digit, index) => (<input key={index} ref={(el) => (otpInputRefs.current[index] = el)} type="text" value={digit} maxLength="1" onChange={(e) => handleOtpChange(index, e)} onKeyDown={(e) => handleOtpKeyDown(index, e)} disabled={loading} className="w-12 h-14 text-center border border-[#1F4D34] rounded-lg text-2xl font-bold text-[#1F4D34] focus:outline-none focus:ring-2 focus:ring-[#A45A2A] disabled:bg-gray-200"/>)) }</div>{testOtp && (<div className="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded-lg text-center"><p className="text-sm text-yellow-800">For testing purposes:</p><p className="text-lg font-bold text-yellow-900">{testOtp}</p></div>)}{loading && <p className="mt-4 text-[#1F4D34]">Verifying...</p>}</div>);
+        return (<div className="flex flex-col items-center w-full"><h2 className="text-xl font-semibold text-[#1F4D34] mb-4">Enter OTP</h2><p className="text-gray-600 mb-6 text-center">An access code was sent to <br/>+91 {phoneNumber}</p><div className="flex space-x-2 md:space-x-3">{otp.map((digit, index) => (<input key={index} ref={(el) => (otpInputRefs.current[index] = el)} type="text" value={digit} maxLength="1" onChange={(e) => handleOtpChange(index, e)} onKeyDown={(e) => handleOtpKeyDown(index, e)} disabled={loading} className="w-12 h-14 text-center border border-[#1F4D34] rounded-lg text-2xl font-bold text-[#1F4D34] focus:outline-none focus:ring-2 focus:ring-[#A45A2A] disabled:bg-gray-200"/>)) }</div>{testOtp && (<div className="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded-lg text-center"><p className="text-sm text-yellow-800">For testing purposes:</p><p className="text-lg font-bold text-yellow-900">{testOtp}</p></div>)}{loading && <p className="mt-4 text-[#1F4D34]">Verifying...</p>}</div>);
       
-      // --- Case 3: Display QR Code (UPDATED) ---
       case 'qr':
         const token = localStorage.getItem('secretToken');
         const qrCodePageUrl = `${BACKEND_URL}/show-qrcode?token=${token}`;
         return (
-          <div className="flex flex-col items-center w-full text-center">
-            <h2 className="text-2xl font-bold text-green-600 mb-4">Access Granted!</h2>
-            <p className="text-gray-600 mb-6">Scan the QR code with your phone or use the code below for other devices.</p>
+          <div className="flex flex-col items-center w-full text-center space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-green-600">Access Granted!</h2>
+              <p className="text-gray-600 mt-1">Scan the QR code with your phone or use the code below for other devices.</p>
+            </div>
             <iframe
               src={qrCodePageUrl}
               title="Secure Wi-Fi QR Code"
               className="w-full h-80 md:h-96 border-2 border-[#1F4D34] rounded-lg shadow-lg"
             />
-            {/* --- NEW: Display the one-time code for laptops --- */}
-            <div className="mt-6 w-full p-4 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+            <div className="w-full p-4 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
               <p className="text-sm text-gray-600 font-semibold">For laptops or other devices:</p>
               <div className="flex items-center justify-center space-x-3 mt-2">
                 <p className="text-2xl font-bold tracking-widest text-[#1F4D34]">{oneTimeCode}</p>
@@ -175,32 +195,42 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      {/* Header with Logo and Branding */}
-      <header className="text-center mb-8">
-        <img src="/CafeGuard_logo.png" alt="CafeGuard logo" className="w-32 h-auto mx-auto" />
-        <h1 className="text-3xl font-bold mt-2">
-          <span className="text-[#A45A2A]">Cafe</span>
-          <span className="text-[#1F4D34]">Guard</span>
-        </h1>
-        <p className="text-md font-semibold">
-          <span className="text-[#A45A2A]">Guarding Connections,</span>
-          <span className="text-[#1F4D34]"> Empowering Cafes.</span>
-        </p>
-      </header>
-      {/* Descriptive text */}
-      <div className="text-center mb-8 text-lg text-[#1F4D34] font-medium max-w-lg mx-auto">
-        <p>
-          Securely connect to cafe Wi-Fi with a simple, one-time
-          password, enhancing both your security and your coffee
-          shop experience.
-        </p>
+    <div className="min-h-screen bg-white lg:grid lg:grid-cols-2">
+      {/* --- LEFT PANEL (Branding - visible on large screens) --- */}
+      <div className="hidden lg:flex flex-col items-center justify-center p-12 bg-gradient-to-br from-[#A45A2A] via-[#5D4037] to-[#1F4D34] text-white relative">
+        <div className="text-center w-full max-w-md">
+          <img src={cafeguard} alt="CafeGuard logo" className="w-60 h-auto mx-auto mb-6" />
+          <h1 className="text-4xl font-bold">
+            <span>Cafe</span>
+            <span className="opacity-80">Guard</span>
+          </h1>
+          <p className="text-lg mt-2 opacity-80">
+            Guarding Connections, Empowering Cafes.
+          </p>
+          <div className="border-t border-white/20 my-8"></div>
+          <p className="text-lg leading-relaxed opacity-90">
+            Securely connect to cafe Wi-Fi with a simple, one-time password, enhancing both your security and your coffee shop experience.
+          </p>
+        </div>
       </div>
-      {/* Main Content Card */}
-      <main className="bg-[#FFF4E6] w-full max-w-md px-8 py-10 rounded-2xl shadow-xl border border-[#1F4D34]/20">
-        {renderStepContent()}
-        {error && (<p className="text-red-600 text-sm text-center mt-4 font-semibold">{error}</p>)}
-      </main>
+
+      {/* --- RIGHT PANEL (Form - visible on all screens) --- */}
+      <div className="flex flex-col items-center justify-center p-4 bg-[#f7f2e9]">
+        {/* Header for Mobile View */}
+        <header className="text-center mb-8 lg:hidden">
+          <img src="/CafeGuard_logo.png" alt="CafeGuard logo" className="w-32 h-auto mx-auto" />
+          <h1 className="text-3xl font-bold mt-2">
+            <span className="text-[#A45A2A]">Cafe</span>
+            <span className="text-[#1F4D34]">Guard</span>
+          </h1>
+        </header>
+        
+        {/* Main Content Card */}
+        <main className="bg-[#FFF4E6] w-full max-w-md px-8 py-10 rounded-2xl shadow-xl border border-[#1F4D34]/20">
+          {renderStepContent()}
+          {error && (<p className="text-red-600 text-sm text-center mt-4 font-semibold">{error}</p>)}
+        </main>
+      </div>
     </div>
   );
 }

@@ -7,7 +7,7 @@ const BACKEND_URL = 'http://localhost:4443';
 // This single component now handles all three steps:
 // 1. Entering a phone number.
 // 2. Verifying the OTP and getting a token.
-// 3. Displaying the final QR code page.
+// 3. Displaying the final QR code and one-time code.
 
 function Login() {
   // State to manage which step of the login process we are on
@@ -15,10 +15,14 @@ function Login() {
   
   // States for user input and API status
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [otp, setOtp] = useState(new Array(6).fill('')); // Your backend sends a 6-digit OTP
+  const [otp, setOtp] = useState(new Array(6).fill(''));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [testOtp, setTestOtp] = useState(''); // State to hold the visible OTP for testing
+  const [testOtp, setTestOtp] = useState('');
+  
+  // --- NEW: State for the one-time code and copy button ---
+  const [oneTimeCode, setOneTimeCode] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
 
   const otpInputRefs = useRef([]);
 
@@ -52,13 +56,9 @@ function Login() {
 
       const responseText = await response.text();
       if (!response.ok) throw new Error(responseText || "Failed to send OTP.");
-
-      console.log("OTP Sent:", responseText);
       
       const otpValue = responseText.split('+')[1]?.trim();
-      if (otpValue) {
-        setTestOtp(otpValue);
-      }
+      if (otpValue) setTestOtp(otpValue);
       
       setPhoneNumber(sanitizedNumber); 
       setStep('otp');
@@ -84,27 +84,33 @@ function Login() {
             }),
         });
 
-        // The backend should now return JSON, not plain text
         const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Verification failed.");
-        }
+        if (!response.ok) throw new Error(data.message || "Verification failed.");
         
-        // --- NEW: Save the secret token from the response to localStorage ---
-        if (data.secret_token) {
+        // --- NEW: Save both the token and the one-time code ---
+        if (data.secret_token && data.one_time_code) {
             localStorage.setItem('secretToken', data.secret_token);
-            console.log("OTP Verified! Token saved:", data.secret_token);
-            setStep('qr'); // Success! Move to the final step
+            setOneTimeCode(data.one_time_code); // Save the code to state
+            console.log("OTP Verified! Token and One-Time Code received.");
+            setStep('qr');
         } else {
-            throw new Error("Verification successful, but no secret token was received from the server.");
+            throw new Error("Verification successful, but required codes were not received.");
         }
 
     } catch (err) {
         setError(err.message);
-        setOtp(new Array(6).fill("")); // Clear OTP field on error
+        setOtp(new Array(6).fill(""));
     } finally {
         setLoading(false);
+    }
+  };
+
+  // --- NEW: Handle copying the one-time code to the clipboard ---
+  const handleCopyCode = () => {
+    if (oneTimeCode) {
+      navigator.clipboard.writeText(oneTimeCode);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
     }
   };
 
@@ -112,20 +118,12 @@ function Login() {
   const handleOtpChange = (index, e) => {
     const value = e.target.value;
     if (isNaN(value)) return;
-
     const newOtp = [...otp];
     newOtp[index] = value.substring(value.length - 1);
     setOtp(newOtp);
-
     const combinedOtp = newOtp.join('');
-
-    if (value && index < 5) {
-      otpInputRefs.current[index + 1].focus();
-    }
-
-    if (combinedOtp.length === 6) {
-      handleOtpSubmit(combinedOtp);
-    }
+    if (value && index < 5) otpInputRefs.current[index + 1].focus();
+    if (combinedOtp.length === 6) handleOtpSubmit(combinedOtp);
   };
 
   const handleOtpKeyDown = (index, e) => {
@@ -137,79 +135,37 @@ function Login() {
   // --- Render different content based on the current 'step' ---
   const renderStepContent = () => {
     switch (step) {
-      // --- Case 1: Phone Number Input ---
       case 'phone':
-        return (
-          <form onSubmit={handlePhoneSubmit} className="w-full flex flex-col space-y-6">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-[#1F4D34] mb-2">Get Started</h2>
-              <p className="text-gray-600">Enter your mobile number to receive a secure access code.</p>
-            </div>
-            <input
-              type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="+91 or 10-digit mobile number"
-              className="bg-[#FAF9F6] rounded-lg w-full h-12 px-4 border border-[#1F4D34] focus:border-[#A45A2A] focus:ring-2 focus:ring-[#A45A2A] outline-none text-[#1F4D34]"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 text-lg font-semibold text-white bg-[#9A5832] rounded-full w-full hover:bg-[#284838] transition-all duration-300 transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:scale-100"
-            >
-              {loading ? 'Sending...' : 'Get OTP'}
-            </button>
-          </form>
-        );
-
-      // --- Case 2: OTP Verification ---
+        return (/* Phone form JSX remains the same */ <form onSubmit={handlePhoneSubmit} className="w-full flex flex-col space-y-6"> <div className="text-center"> <h2 className="text-xl font-semibold text-[#1F4D34] mb-2">Get Started</h2> <p className="text-gray-600">Enter your mobile number to receive a secure access code.</p></div><input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+91 or 10-digit mobile number" className="bg-[#FAF9F6] rounded-lg w-full h-12 px-4 border border-[#1F4D34] focus:border-[#A45A2A] focus:ring-2 focus:ring-[#A45A2A] outline-none text-[#1F4D34]"/> <button type="submit" disabled={loading} className="px-6 py-3 text-lg font-semibold text-white bg-[#9A5832] rounded-full w-full hover:bg-[#284838] transition-all duration-300 transform hover:scale-105 shadow-lg disabled:bg-gray-400 disabled:scale-100">{loading ? 'Sending...' : 'Get OTP'}</button></form>);
       case 'otp':
-        return (
-          <div className="flex flex-col items-center w-full">
-            <h2 className="text-xl font-semibold text-[#1F4D34] mb-4">Enter OTP</h2>
-            <p className="text-gray-600 mb-6 text-center">An access code was sent to <br/>+91 {phoneNumber}</p>
-            <div className="flex space-x-2 md:space-x-3">
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(el) => (otpInputRefs.current[index] = el)}
-                  type="text"
-                  value={digit}
-                  maxLength="1"
-                  onChange={(e) => handleOtpChange(index, e)}
-                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                  disabled={loading}
-                  className="w-12 h-14 text-center border border-[#1F4D34] rounded-lg text-2xl font-bold text-[#1F4D34] focus:outline-none focus:ring-2 focus:ring-[#A45A2A] disabled:bg-gray-200"
-                />
-              ))}
-            </div>
-            {testOtp && (
-              <div className="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded-lg text-center">
-                <p className="text-sm text-yellow-800">For testing purposes:</p>
-                <p className="text-lg font-bold text-yellow-900">{testOtp}</p>
-              </div>
-            )}
-            {loading && <p className="mt-4 text-[#1F4D34]">Verifying...</p>}
-          </div>
-        );
-
+        return (/* OTP form JSX remains the same, with the test OTP hint */<div className="flex flex-col items-center w-full"><h2 className="text-xl font-semibold text-[#1F4D34] mb-4">Enter OTP</h2><p className="text-gray-600 mb-6 text-center">An access code was sent to <br/>+91 {phoneNumber}</p><div className="flex space-x-2 md:space-x-3">{otp.map((digit, index) => (<input key={index} ref={(el) => (otpInputRefs.current[index] = el)} type="text" value={digit} maxLength="1" onChange={(e) => handleOtpChange(index, e)} onKeyDown={(e) => handleOtpKeyDown(index, e)} disabled={loading} className="w-12 h-14 text-center border border-[#1F4D34] rounded-lg text-2xl font-bold text-[#1F4D34] focus:outline-none focus:ring-2 focus:ring-[#A45A2A] disabled:bg-gray-200"/>)) }</div>{testOtp && (<div className="mt-4 p-2 bg-yellow-100 border border-yellow-300 rounded-lg text-center"><p className="text-sm text-yellow-800">For testing purposes:</p><p className="text-lg font-bold text-yellow-900">{testOtp}</p></div>)}{loading && <p className="mt-4 text-[#1F4D34]">Verifying...</p>}</div>);
+      
       // --- Case 3: Display QR Code (UPDATED) ---
       case 'qr':
-        // The /show-qrcode endpoint returns a full HTML page. 
-        // We use an iframe to display it seamlessly within our React app.
-        // NOTE: Your backend will need to be updated to accept the token as a query parameter.
         const token = localStorage.getItem('secretToken');
         const qrCodePageUrl = `${BACKEND_URL}/show-qrcode?token=${token}`;
-        
         return (
           <div className="flex flex-col items-center w-full text-center">
             <h2 className="text-2xl font-bold text-green-600 mb-4">Access Granted!</h2>
-            <p className="text-gray-600 mb-6">Your secure QR code is loading below.</p>
+            <p className="text-gray-600 mb-6">Scan the QR code with your phone or use the code below for other devices.</p>
             <iframe
               src={qrCodePageUrl}
               title="Secure Wi-Fi QR Code"
               className="w-full h-80 md:h-96 border-2 border-[#1F4D34] rounded-lg shadow-lg"
             />
+            {/* --- NEW: Display the one-time code for laptops --- */}
+            <div className="mt-6 w-full p-4 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg">
+              <p className="text-sm text-gray-600 font-semibold">For laptops or other devices:</p>
+              <div className="flex items-center justify-center space-x-3 mt-2">
+                <p className="text-2xl font-bold tracking-widest text-[#1F4D34]">{oneTimeCode}</p>
+                <button 
+                  onClick={handleCopyCode}
+                  className="px-4 py-1 text-sm font-semibold text-white bg-[#9A5832] rounded-md hover:bg-[#284838] transition-all"
+                >
+                  {isCopied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+            </div>
           </div>
         );
 
@@ -232,8 +188,7 @@ function Login() {
           <span className="text-[#1F4D34]"> Empowering Cafes.</span>
         </p>
       </header>
-
-      {/* Descriptive text restored from your original component */}
+      {/* Descriptive text */}
       <div className="text-center mb-8 text-lg text-[#1F4D34] font-medium max-w-lg mx-auto">
         <p>
           Securely connect to cafe Wi-Fi with a simple, one-time
@@ -241,14 +196,10 @@ function Login() {
           shop experience.
         </p>
       </div>
-
       {/* Main Content Card */}
       <main className="bg-[#FFF4E6] w-full max-w-md px-8 py-10 rounded-2xl shadow-xl border border-[#1F4D34]/20">
         {renderStepContent()}
-        {/* Display errors at the bottom of the card */}
-        {error && (
-            <p className="text-red-600 text-sm text-center mt-4 font-semibold">{error}</p>
-        )}
+        {error && (<p className="text-red-600 text-sm text-center mt-4 font-semibold">{error}</p>)}
       </main>
     </div>
   );

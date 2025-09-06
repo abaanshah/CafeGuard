@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../assets/cafeguardLogo.png';
+import { Camera } from 'lucide-react';
 
 // Note: Ensure the ZXing script is in your public/index.html
 // <script src="https://unpkg.com/@zxing/library@latest"></script>
@@ -14,7 +15,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   
   // --- MOCK DATA ---
-  const [stats, setStats] = useState({ activeUsers: 12, totalLoginsToday: 45 });
+  const [stats, setStats] = useState({ activeUsers: 4, totalLoginsToday: 45 });
   const [activeCustomers, setActiveCustomers] = useState([
     { id: '1', phone: '...1234', entryTime: '3:45 PM', timeLeft: '15m' },
     { id: '2', phone: '...5678', entryTime: '4:02 PM', timeLeft: '32m' },
@@ -98,14 +99,7 @@ const AdminDashboard = () => {
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       {/* --- Left Floating Sidebar --- */}
-      <aside className="w-80 bg-white shadow-lg flex flex-col shrink-0">
-        <div className="flex items-center justify-center h-24 border-b-2 border-gray-200">
-            <img src={logo} alt="CafeGuard Logo" className="h-16 w-auto" />
-            <h1 className="text-2xl font-bold ml-2">
-                <span className="text-[#A45A2A]">Cafe</span><span className="text-[#1F4D34]">Guard</span>
-            </h1>
-        </div>
-
+      <aside className="w-100 bg-white shadow-lg flex flex-col shrink-0">
         <div className="p-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Analytics</h2>
             <div className="mt-4 grid grid-cols-2 gap-4">
@@ -150,10 +144,10 @@ const AdminDashboard = () => {
 
       {/* --- Right Main Panel (Scanner) --- */}
       <main className="flex-1 flex items-center justify-center p-8 bg-gray-200">
-        <div className="w-full h-full max-w-4xl max-h-[700px] bg-white rounded-2xl shadow-xl flex flex-col items-center justify-center transition-all duration-300">
+        <div className="w-full h-full mt-[-100px] max-w-4xl max-h-[650px] bg-white rounded-2xl shadow-xl flex flex-col justify-center transition-all duration-300">
             {!isScannerActive ? (
                 <div className="text-center p-8 animate-fadeIn">
-                    <QrIcon className="h-24 w-24 mx-auto text-gray-300" />
+                    <Camera className="h-24 w-24 mx-auto text-gray-300" />
                     <h2 className="mt-6 text-3xl font-bold text-gray-800">Verify Customer Access</h2>
                     <p className="mt-2 text-gray-500">Click the button below to activate the camera and scan a customer's QR code.</p>
                     <button onClick={startScanner} className="mt-8 inline-flex items-center space-x-3 px-8 py-4 bg-[#9A5832] text-white text-xl font-bold rounded-full shadow-lg transform hover:scale-105 transition-transform">

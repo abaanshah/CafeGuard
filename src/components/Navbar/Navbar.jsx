@@ -99,7 +99,7 @@ const Navbar = () => {
 
             {/* --- CTA & Mobile Menu Button --- */}
             <div className="flex items-center">
-              <Link to="/login" className="hidden sm:block px-6 py-2 font-semibold text-[#1F4D34] border-2 border-[#1F4D34] rounded-full hover:bg-[#1F4D34] hover:text-white transition-all duration-300">
+              <Link to="/adminlogin" className="hidden sm:block px-6 py-2 font-semibold text-[#1F4D34] border-2 border-[#1F4D34] rounded-full hover:bg-[#1F4D34] hover:text-white transition-all duration-300">
                 Admin Login
               </Link>
               <div className="md:hidden ml-4">
@@ -118,7 +118,7 @@ const Navbar = () => {
                   {link.text}
                 </a>
               ))}
-              <Link to="/login" className="w-4/5 text-center mt-2 px-6 py-2 font-semibold text-white bg-[#9A5832] rounded-full hover:bg-[#1F4D34] transition-all duration-300">
+              <Link to="/adminlogin" className="w-4/5 text-center mt-2 px-6 py-2 font-semibold text-white bg-[#9A5832] rounded-full hover:bg-[#1F4D34] transition-all duration-300">
                 Admin Login
               </Link>
             </div>

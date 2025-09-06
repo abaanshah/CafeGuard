@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '/src/assets/cafeguardLogo.png'; // Make sure this path is correct for your project structure
+import logo from '../../assets/cafeguardLogo.png'; // Make sure this path is correct for your project structure
 
 // --- Icon Components ---
 const MenuIcon = ({ className }) => (
@@ -78,13 +78,10 @@ const Navbar = () => {
 
   return (
     <>
-      {/* The outer nav correctly has the full height */}
       <nav className={`w-full h-[100px] fixed top-0 z-50 transition-transform duration-300 ease-in-out ${isNavbarVisible ? 'translate-y-0' : '-translate-y-full'} bg-white/50 backdrop-blur-lg shadow-md`}>
-        <div className="container mx-auto px-6 h-full"> {/* <-- FIX: Added h-full here */}
-          {/* FIX: Changed h-20 to h-full to use the full navbar height for alignment */}
+        <div className="container mx-auto px-6 h-full">
           <div className="flex justify-between items-center h-full">
             <Link to="/" className="flex items-center space-x-2 shrink-0">
-              {/* FIX: Adjusted logo height to fit nicely within the navbar */}
               <img src={logo} alt="CafeGuard Logo" className="h-24 w-auto" />
             </Link>
 
@@ -97,33 +94,46 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* --- CTA & Mobile Menu Button --- */}
-            <div className="flex items-center">
-              <Link to="/adminlogin" className="hidden sm:block px-6 py-2 font-semibold text-[#1F4D34] border-2 border-[#1F4D34] rounded-full hover:bg-[#1F4D34] hover:text-white transition-all duration-300">
-                Admin Login
-              </Link>
-              <div className="md:hidden ml-4">
+            {/* --- CTA Buttons & Mobile Menu --- */}
+            <div className="flex items-center space-x-4">
+              {/* --- UPDATED: Button Group --- */}
+              <div className="hidden sm:flex items-center space-x-4">
+                <Link to="/adminlogin" className="px-5 py-2 font-semibold text-[#1F4D34] border-2 border-[#1F4D34] rounded-full hover:bg-[#1F4D34] hover:text-white transition-all duration-300">
+                  Admin Login
+                </Link>
+                <Link to="/login" className="px-5 py-2 font-semibold text-white bg-[#9A5832] rounded-full hover:bg-[#284838] transition-all duration-300 transform hover:scale-105">
+                  User Login
+                </Link>
+              </div>
+              
+              {/* --- Mobile Menu Button --- */}
+              <div className="md:hidden">
                 <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-[#1F4D34] focus:outline-none">
                   {isMenuOpen ? <CloseIcon className="h-7 w-7" /> : <MenuIcon className="h-7 w-7" />}
                 </button>
               </div>
             </div>
           </div>
-
-          {/* --- Mobile Menu --- */}
-          {isMenuOpen && (
-            <div className="md:hidden absolute top-[120px] left-0 w-full bg-white/95 backdrop-blur-lg shadow-lg pb-4 flex flex-col items-center space-y-4">
-              {navLinks.map((link) => (
-                <a key={link.text} href={link.href} onClick={(e) => handleScrollTo(e, link.href.substring(1))} className="text-gray-700 font-semibold hover:text-[#9A5832] transition-colors py-2">
-                  {link.text}
-                </a>
-              ))}
-              <Link to="/adminlogin" className="w-4/5 text-center mt-2 px-6 py-2 font-semibold text-white bg-[#9A5832] rounded-full hover:bg-[#1F4D34] transition-all duration-300">
-                Admin Login
-              </Link>
-            </div>
-          )}
         </div>
+
+        {/* --- Mobile Menu (UPDATED) --- */}
+        {isMenuOpen && (
+          <div className="md:hidden absolute top-[100px] left-0 w-full bg-white/95 backdrop-blur-lg shadow-lg pb-6 pt-4 flex flex-col items-center space-y-4">
+            {navLinks.map((link) => (
+              <a key={link.text} href={link.href} onClick={(e) => handleScrollTo(e, link.href.substring(1))} className="text-gray-700 font-semibold hover:text-[#9A5832] transition-colors py-2">
+                {link.text}
+              </a>
+            ))}
+            <div className="border-t w-4/5 my-2"></div>
+            {/* --- Mobile Buttons --- */}
+            <Link to="/login" className="w-4/5 text-center px-6 py-2.5 font-semibold text-white bg-[#9A5832] rounded-full hover:bg-[#1F4D34] transition-all duration-300">
+              User Login
+            </Link>
+            <Link to="/adminlogin" className="w-4/5 text-center px-6 py-2.5 font-semibold text-[#1F4D34] border-2 border-[#1F4D34] rounded-full hover:bg-[#1F4D34] hover:text-white transition-all duration-300">
+              Admin Login
+            </Link>
+          </div>
+        )}
       </nav>
       
       {/* --- Back to Top Button --- */}

@@ -48,7 +48,7 @@ const Hero = () => {
   const handleToLogin = () => navigate("/login");
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center text-center text-white overflow-hidden">
+    <section className="relative min-h-screen flex  justify-center text-center text-white overflow-hidden">
       {/* Background with subtle zoom animation */}
       <motion.div
         className="absolute inset-0 z-0"
@@ -65,7 +65,7 @@ const Hero = () => {
       </motion.div>
 
       {/* Main Content */}
-      <div className="relative z-10 container mt-[-120px] px-6 py-24">
+      <div className="relative z-10 container mt-[-50px] px-6 py-24">
         {/* Heading */}
         <motion.h1
           className="text-4xl md:text-6xl font-extrabold leading-tight tracking-tight text-shadow-lg"
@@ -97,20 +97,6 @@ const Hero = () => {
           growth.
         </motion.p>
 
-        {/* CTA Button */}
-        <motion.div
-          className="mt-8"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.9, duration: 0.8, type: "spring" }}
-        >
-          <button
-            onClick={handleToLogin}
-            className="px-10 py-4 text-lg font-semibold text-white bg-[#9A5832] rounded-full hover:bg-[#284838] transition-all duration-300 transform hover:scale-105 shadow-2xl focus:outline-none focus:ring-4 focus:ring-amber-300"
-          >
-            Get Secure Access Now
-          </button>
-        </motion.div>
 
         {/* Features */}
         <div className="mt-20 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
@@ -123,7 +109,7 @@ const Hero = () => {
     transition={{
       delay: 1 + index * 0.2,
       duration: 0.5,
-      ease: "easeOut"
+      ease: "easeInOut"
     }}
     whileHover={{
       scale: 1.05,

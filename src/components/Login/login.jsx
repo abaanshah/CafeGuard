@@ -85,10 +85,9 @@ function Login() {
       if (!response.ok) throw new Error(data.message || "Verification failed.");
 
       // --- NEW: Save both the token and the one-time code ---
-      if (data.secret_token && data.one_time_code) {
+      if (data.secret_token) {
         localStorage.setItem("secretToken", data.secret_token);
-        setOneTimeCode(data.one_time_code); // Save the code to state
-        console.log("OTP Verified! Token and One-Time Code received.");
+        console.log("OTP Verified! Token and One-Time Code received. ",data.secret_token);
         setStep("qr");
       } else {
         throw new Error(
@@ -104,13 +103,18 @@ function Login() {
   };
 
   // --- NEW: Handle copying the one-time code to the clipboard ---
-  const handleCopyCode = () => {
-    if (oneTimeCode) {
-      navigator.clipboard.writeText(oneTimeCode);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+  const handleCopyCode = async (token) => {
+    if (token) {
+      try {
+        await navigator.clipboard.writeText(token); // ✅ wait for clipboard write
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+      } catch (err) {
+        console.error("Failed to copy: ", err);
+      }
     }
   };
+  
 
   // --- Helper functions for the OTP input boxes ---
   const handleOtpChange = (index, e) => {
@@ -198,7 +202,7 @@ function Login() {
 
       case "qr":
         const token = localStorage.getItem("secretToken");
-        const qrCodePageUrl = `${BACKEND_URL}/show-qrcode?token=${token}`;
+        const qrCodePageUrl = `${BACKEND_URL}/show-QrCode`;
         return (
           <div className="flex flex-col items-center w-full text-center space-y-6">
             <div>
@@ -220,11 +224,11 @@ function Login() {
                 For laptops or other devices:
               </p>
               <div className="flex items-center justify-center space-x-3 mt-2">
-                <p className="text-2xl font-bold tracking-widest text-[#1F4D34]">
-                  {oneTimeCode}
+                <p className="text-2xl font-bold  text-[#1F4D34]">
+                  {token}
                 </p>
                 <button
-                  onClick={handleCopyCode}
+                  onClick={() => handleCopyCode(token)} 
                   className="px-4 py-1 text-sm font-semibold text-white bg-[#9A5832] rounded-md hover:bg-[#284838] transition-all"
                 >
                   {isCopied ? "Copied!" : "Copy"}
